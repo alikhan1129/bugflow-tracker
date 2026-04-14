@@ -1,0 +1,20 @@
+# Node
+node_modules/
+dist/
+.eslintcache
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+.env
+
+# Database
+*.db
+instance/
+
+# OS
+.DS_Store
+Thumbs.db
