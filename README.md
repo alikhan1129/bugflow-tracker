@@ -1,5 +1,7 @@
 # BugFlow Tracker
 
+**Live Demo:** [https://bugflow-tracker.onrender.com](https://bugflow-tracker.onrender.com)
+
 BugFlow is a lean, AI-powered bug tracking system designed for speed and clarity. It helps teams report issues and leverages LLMs to automatically triage them by category and severity.
 
 ## Features
