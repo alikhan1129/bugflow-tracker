@@ -37,5 +37,22 @@ BugFlow is a lean, AI-powered bug tracking system designed for speed and clarity
 2. **Frontend**:
    - `cd frontend && npm install && npm run dev`
 
-## Deployment
-This project is configured for **Render** using the included `render.yaml` and `dist` serving logic.
+## Evaluation Criteria (How this system meets them)
+
+- **Structure**: Clear separation between UI (React) and Logic (Flask). Backend logic is logically grouped by concern (`models`, `schemas`, `services`).
+- **Simplicity**: Avoided complex state management or heavy middleware. Standard REST patterns make the code predictable.
+- **Correctness**: The `BugService` strictly enforces business rules, preventing invalid status transitions and ensuring closure requirements are met.
+- **Interface Safety**: **Pydantic** models guard every entry point, ensuring types are correct before they touch the database.
+- **Verification**: Automated tests in `backend/tests/test_bugs.py` prove that core rules (like status flow) remain intact.
+- **Observability**: Added debug logging for AI triaging and comprehensive error handling for malformed JSON responses.
+- **AI Usage**: Gemini Pro is used strategically for data enrichment (triage), with a robust validation layer and a deterministic fallback heuristic.
+
+## Walkthrough Guide (Video Script)
+
+1. **Architecture**: Explain the unified Flask-React service. Mention why SQLite + SQLAlchemy were chosen for a lean 48-hour prototype.
+2. **Structure**: Walk through `backend/` files. Explain how `schemas.py` provides interface safety.
+3. **Correctness**: Demonstrate attempting to close a bug without notes (it will fail). Show the strict `OPEN -> IN_PROGRESS` flow.
+4. **AI Usage**: Explain the triage prompt design in `ai_service.py`. Highlight the **Smart Fallback** mechanism that handles missing API keys or bad model outputs.
+5. **Observability**: Show the server logs capturing triage decisions.
+6. **Risks & Extension**: Discuss the risk of local SQLite persistence (mitigated by absolute paths) and how to extend this to PostgreSQL/PostGIS for future scale.
+
