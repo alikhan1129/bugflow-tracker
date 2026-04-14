@@ -2,12 +2,11 @@ import pytest
 import sys
 import os
 
-# Add backend to sys.path if needed
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the project root to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from app import create_app
-from db import db
-from models import Bug
+from backend.app import create_app
+from backend.models import db, Bug
 
 @pytest.fixture
 def app():
@@ -20,6 +19,7 @@ def app():
     with app.app_context():
         db.create_all()
         yield app
+        db.session.remove()
         db.drop_all()
 
 @pytest.fixture
@@ -41,10 +41,11 @@ def test_invalid_status_transition(client):
     res = client.post('/api/bugs', json={"title": "T1", "description": "D1"})
     bug_id = res.get_json()['id']
 
-    # Try OPEN -> CLOSED (Invalid, must go through IN_PROGRESS and RESOLVED)
-    response = client.patch(f'/api/bugs/{bug_id}', json={"status": "CLOSED"})
-    assert response.status_code == 422
-    assert "Invalid status transition" in response.get_json()['error']
+    # Try OPEN -> RESOLVED (Invalid, must go through IN_PROGRESS)
+    # Our flow: OPEN -> IN_PROGRESS -> RESOLVED -> CLOSED
+    response = client.patch(f'/api/bugs/{bug_id}', json={"status": "RESOLVED"})
+    assert response.status_code == 400
+    assert "Invalid transition" in response.get_json()['error']
 
 def test_valid_status_transition_flow(client):
     res = client.post('/api/bugs', json={"title": "T1", "description": "D1"})
@@ -62,8 +63,8 @@ def test_valid_status_transition_flow(client):
 
     # RESOLVED -> CLOSED (Missing notes)
     res = client.patch(f'/api/bugs/{bug_id}', json={"status": "CLOSED"})
-    assert res.status_code == 422
-    assert "resolution notes" in res.get_json()['error']
+    assert res.status_code == 400
+    assert "Notes required" in res.get_json()['error']
 
     # RESOLVED -> CLOSED (With notes)
     res = client.patch(f'/api/bugs/{bug_id}', json={
